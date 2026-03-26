@@ -1,0 +1,991 @@
+{
+  "version": "1.0",
+  "description": "UPPETIT Neurobot RAG benchmark dataset",
+  "questions": [
+    {
+      "id": "team_001",
+      "category": "team",
+      "question": "Кто такой Пётр Попов?",
+      "expected_facts": [
+        "операционный директор"
+      ],
+      "expected_sources": [
+        "vnutri-uppetit",
+        "welcome"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "team_002",
+      "category": "team",
+      "question": "Кто такой Антон Дулов?",
+      "expected_facts": [
+        "генеральный директор"
+      ],
+      "expected_sources": [
+        "vnutri-uppetit",
+        "welcome"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "team_003",
+      "category": "team",
+      "question": "Кто такой Александр Попов?",
+      "expected_facts": [
+        "ассортимент"
+      ],
+      "expected_sources": [
+        "vnutri-uppetit",
+        "welcome"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "team_004",
+      "category": "team",
+      "question": "Какие ценности у компании UPPETIT?",
+      "expected_facts": [
+        "ценност"
+      ],
+      "expected_sources": [
+        "vnutri-uppetit",
+        "welcome"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "team_005",
+      "category": "team",
+      "question": "Что делать в первые дни работы в UPPETIT?",
+      "expected_facts": [
+        "перв"
+      ],
+      "expected_sources": [
+        "vnutri-uppetit",
+        "welcome"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "coffee_001",
+      "category": "coffee",
+      "question": "Расскажи про наше зерно",
+      "expected_facts": [
+        "зерн",
+        "обжарк"
+      ],
+      "expected_sources": [
+        "Zerno",
+        "Kofeynaya"
+      ],
+      "expect_images": false,
+      "expect_found": true
+    },
+    {
+      "id": "coffee_002",
+      "category": "coffee",
+      "question": "Как правильно взбивать молоко?",
+      "expected_facts": [
+        "жирност",
+        "холодн",
+        "питчер"
+      ],
+      "expected_sources": [
+        "Памятка по взбиванию",
+        "baristika"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "coffee_003",
+      "category": "coffee",
+      "question": "Опиши карту напитков UPPETIT",
+      "expected_facts": [
+        "напитк"
+      ],
+      "expected_sources": [
+        "Karta_Napitkov",
+        "Karta Napitkov"
+      ],
+      "expect_images": false,
+      "expect_found": true
+    },
+    {
+      "id": "coffee_004",
+      "category": "coffee",
+      "question": "Что такое экстракция кофе?",
+      "expected_facts": [
+        "экстракц"
+      ],
+      "expected_sources": [
+        "baristika"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "coffee_005",
+      "category": "coffee",
+      "question": "Как приготовить и списать эспрессо?",
+      "expected_facts": [
+        "эспрессо"
+      ],
+      "expected_sources": [
+        "Prigotovlenie",
+        "espresso",
+        "baristika"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "procedures_001",
+      "category": "procedures",
+      "question": "Как правильно маркировать полки?",
+      "expected_facts": [
+        "маркировк"
+      ],
+      "expected_sources": [
+        "маркировке полок",
+        "маркировк"
+      ],
+      "expect_images": false,
+      "expect_found": true
+    },
+    {
+      "id": "procedures_002",
+      "category": "procedures",
+      "question": "Какие правила кассовой дисциплины?",
+      "expected_facts": [
+        "кассов",
+        "наличн"
+      ],
+      "expected_sources": [
+        "kassovaya",
+        "Кассовая дисциплина"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "procedures_003",
+      "category": "procedures",
+      "question": "Как принимать товар и работать с накладными?",
+      "expected_facts": [
+        "прием",
+        "накладн"
+      ],
+      "expected_sources": [
+        "priem-tovara",
+        "порядок приема"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "procedures_004",
+      "category": "procedures",
+      "question": "Как списывать продукцию?",
+      "expected_facts": [
+        "списан"
+      ],
+      "expected_sources": [
+        "rabota-s-iiko",
+        "spisanie"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "procedures_005",
+      "category": "procedures",
+      "question": "Расскажи про акцию за отметку в соцсетях",
+      "expected_facts": [
+        "отметк",
+        "напиток"
+      ],
+      "expected_sources": [
+        "aktsiya",
+        "отметк"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "procedures_006",
+      "category": "procedures",
+      "question": "Как правильно упаковывать и маркировать продукцию?",
+      "expected_facts": [
+        "упаковк",
+        "маркировк"
+      ],
+      "expected_sources": [
+        "упаковке и маркировк"
+      ],
+      "expect_images": false,
+      "expect_found": true
+    },
+    {
+      "id": "equipment_001",
+      "category": "equipment",
+      "question": "Как промывать кофемашину WMF?",
+      "expected_facts": [
+        "промыв",
+        "WMF"
+      ],
+      "expected_sources": [
+        "Регламент промывки WMF",
+        "WMF"
+      ],
+      "expect_images": false,
+      "expect_found": true
+    },
+    {
+      "id": "equipment_002",
+      "category": "equipment",
+      "question": "Как настроить кофемолку?",
+      "expected_facts": [
+        "помол",
+        "звен"
+      ],
+      "expected_sources": [
+        "Nastroyka Kofemolki",
+        "Настройка кофемолк"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "equipment_003",
+      "category": "equipment",
+      "question": "Как очистить варочный модуль кофемашины?",
+      "expected_facts": [
+        "варочн",
+        "модул"
+      ],
+      "expected_sources": [
+        "Очистка варочного модуля"
+      ],
+      "expect_images": false,
+      "expect_found": true
+    },
+    {
+      "id": "equipment_004",
+      "category": "equipment",
+      "question": "Что делать при неисправности кофейного оборудования?",
+      "expected_facts": [
+        "неисправност"
+      ],
+      "expected_sources": [
+        "neispravnosti",
+        "неисправност"
+      ],
+      "expect_images": false,
+      "expect_found": true
+    },
+    {
+      "id": "equipment_005",
+      "category": "equipment",
+      "question": "Как работать с гигрометрами?",
+      "expected_facts": [
+        "гигрометр"
+      ],
+      "expected_sources": [
+        "Gigrometry",
+        "гигрометр"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "tables_001",
+      "category": "tables",
+      "question": "Какие сроки хранения у готовой еды?",
+      "expected_facts": [
+        "72 часа",
+        "48 часов"
+      ],
+      "expected_sources": [
+        "Сроки реализации",
+        "Sroki"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "tables_002",
+      "category": "tables",
+      "question": "Расскажи про ТТК зимнего меню",
+      "expected_facts": [
+        "ТТК",
+        "меню"
+      ],
+      "expected_sources": [
+        "ТТК",
+        "Зимнее меню"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "tables_003",
+      "category": "tables",
+      "question": "Какая КБЖУ у напитков?",
+      "expected_facts": [
+        "калори",
+        "белк"
+      ],
+      "expected_sources": [
+        "Kbzhu"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "tables_004",
+      "category": "tables",
+      "question": "Какая схема зарплаты в компании?",
+      "expected_facts": [
+        "аванс",
+        "15 числа",
+        "30 числа"
+      ],
+      "expected_sources": [
+        "Shema ZP",
+        "Схема ЗП"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "tables_005",
+      "category": "tables",
+      "question": "Что входит в ежедневный чек-лист?",
+      "expected_facts": [
+        "чек-лист"
+      ],
+      "expected_sources": [
+        "чек-лист",
+        "Ежедневный"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "misc_001",
+      "category": "misc",
+      "question": "Как принимать оплату через СБП?",
+      "expected_facts": [
+        "СБП"
+      ],
+      "expected_sources": [
+        "SBP",
+        "СБП"
+      ],
+      "expect_images": false,
+      "expect_found": true
+    },
+    {
+      "id": "misc_002",
+      "category": "misc",
+      "question": "Расскажи про программу Приведи друга",
+      "expected_facts": [
+        "приведи друга",
+        "бонус"
+      ],
+      "expected_sources": [
+        "Privedi",
+        "друга"
+      ],
+      "expect_images": false,
+      "expect_found": true
+    },
+    {
+      "id": "misc_003",
+      "category": "misc",
+      "question": "Какие обязанности у сотрудников UPPETIT?",
+      "expected_facts": [
+        "обязанност"
+      ],
+      "expected_sources": [
+        "Обязанности сотрудников"
+      ],
+      "expect_images": true,
+      "expect_found": true
+    },
+    {
+      "id": "misc_004",
+      "category": "misc",
+      "question": "Как проверять холодильники?",
+      "expected_facts": [
+        "холодильник",
+        "температур"
+      ],
+      "expected_sources": [
+        "холодильник"
+      ],
+      "expect_images": false,
+      "expect_found": true
+    },
+    {
+      "id": "edge_001",
+      "category": "edge_cases",
+      "question": "Какая погода сегодня в Москве?",
+      "expected_facts": [],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": false
+    },
+    {
+      "id": "edge_002",
+      "category": "edge_cases",
+      "question": "Кто президент России?",
+      "expected_facts": [],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": false
+    },
+    {
+      "id": "edge_003",
+      "category": "edge_cases",
+      "question": "Расскажи анекдот про программистов",
+      "expected_facts": [],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": false
+    },
+    {
+      "id": "edge_004",
+      "category": "edge_cases",
+      "question": "Как приготовить борщ?",
+      "expected_facts": [],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": false
+    },
+    {
+      "id": "edge_005",
+      "category": "edge_cases",
+      "question": "Сколько стоит биткоин?",
+      "expected_facts": [],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": false
+    },
+    {
+      "id": "attest_001",
+      "category": "attestation",
+      "question": "Сколько горячей воды необходимо добавить при приготовлении напитка классической зеленой матчи 0,4?",
+      "expected_facts": [
+        "40гр"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "40гр",
+      "wrong_answers": [
+        "45гр",
+        "50гр",
+        "48гр"
+      ]
+    },
+    {
+      "id": "attest_002",
+      "category": "attestation",
+      "question": "Как исправить мелкий помол?",
+      "expected_facts": [
+        "увеличить"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Увеличить помол, прокрутив жернов на кофемолке",
+      "wrong_answers": [
+        "Уменьшить помол, прокрутив жернова на кофемолке",
+        "Добавить больше кофе в холдер",
+        "Использовать холодную воду"
+      ]
+    },
+    {
+      "id": "attest_003",
+      "category": "attestation",
+      "question": "Акция “Горячее+Салат” что входит в состав?",
+      "expected_facts": [
+        "горячее"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Горячее: Котлета по-домашнему с фузилли и томатным соусом или Курица терияки с лингвини; Салат: Винегрет или Витамикс",
+      "wrong_answers": [
+        "Горячее: Гуляш из свинины с гречей или Паста Карбонара; Салат: Крабовый или Витамикс",
+        "Горячее: Плов с курицей или Паста терияки; Салат: Петровский или Крабовый",
+        "Горячее: Гуляш из свинины с гречей или Плов с курицей; Салат: Винегрет или Витамикс"
+      ]
+    },
+    {
+      "id": "attest_004",
+      "category": "attestation",
+      "question": "Сколько грамм молока и сливок идет в рецепт Рафа 0,4?",
+      "expected_facts": [
+        "140гр",
+        "140гр"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Молоко - 140гр.\nСливки - 140гр.",
+      "wrong_answers": [
+        "Молоко - 150гр.\nСливки - 150гр.",
+        "Молоко - 110гр.\nСливки - 110гр.",
+        "Молоко - 120гр.\nСливки - 120гр."
+      ]
+    },
+    {
+      "id": "attest_005",
+      "category": "attestation",
+      "question": "Как понять, что помол мелкий?",
+      "expected_facts": [
+        "эспрессо"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Эспрессо течет каплями, горчит, напоминает анальгин",
+      "wrong_answers": [
+        "Эспрессо идёт быстро и бледный",
+        "Кофе водянистый и кислый",
+        "Вкус сбалансированный, но без аромата"
+      ]
+    },
+    {
+      "id": "attest_006",
+      "category": "attestation",
+      "question": "На какую статью необходимо списать продукцию, которую уронил гость?",
+      "expected_facts": [
+        "статья"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Статья \"Воровство/ущерб от покупателя\"",
+      "wrong_answers": [
+        "Статья \"Списание на маркетинг\"",
+        "Статья \"Просроченная продукция\""
+      ]
+    },
+    {
+      "id": "attest_007",
+      "category": "attestation",
+      "question": "Как часто заполняется журнал \"План-график уборок\" ?",
+      "expected_facts": [
+        "каждые"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Каждые 2 часа во время смены",
+      "wrong_answers": [
+        "Каждый день утром и вечером",
+        "Каждый день только утром",
+        "Каждый день только вечером"
+      ]
+    },
+    {
+      "id": "attest_008",
+      "category": "attestation",
+      "question": "Что такое ротация товара?",
+      "expected_facts": [
+        "своевременное"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Своевременное продвижение товара с более ранним сроком годности вперёд, а свежего - назад",
+      "wrong_answers": [
+        "Перемещение товара между точками для выравнивания остатков",
+        "Размещение нового товара на витрине поверх старого",
+        "Обновление ассортимента раз в неделю"
+      ]
+    },
+    {
+      "id": "attest_009",
+      "category": "attestation",
+      "question": "Сколько шотов эспрессо идет в капучино 0,3?",
+      "expected_facts": [],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "2 шота",
+      "wrong_answers": [
+        "1 шот",
+        "3 шота"
+      ]
+    },
+    {
+      "id": "attest_010",
+      "category": "attestation",
+      "question": "Инвентарем какого цвета убирают торговый зал?",
+      "expected_facts": [
+        "синий"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Синий",
+      "wrong_answers": [
+        "Красный",
+        "Желтый"
+      ]
+    },
+    {
+      "id": "attest_011",
+      "category": "attestation",
+      "question": "Как часто происходит ротация блюд на полках?",
+      "expected_facts": [
+        "неделю"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Раз в неделю",
+      "wrong_answers": [
+        "Раз в две недели",
+        "Раз в месяц"
+      ]
+    },
+    {
+      "id": "attest_012",
+      "category": "attestation",
+      "question": "Каким зерном мы пользуемся?",
+      "expected_facts": [
+        "100%"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "100% Арабика, страна Бразилия, регион Серрадо, натуральная обработка, средняя обжарка, вкусы: шоколад и жареные орехи",
+      "wrong_answers": [
+        "100% Робуста, Вьетнам, мытая обработка",
+        "Смесь Арабики и Робусты, Колумбия, мытая обработка",
+        "Арабика, Эфиопия, средняя обжарка, вкус цитруса"
+      ]
+    },
+    {
+      "id": "attest_013",
+      "category": "attestation",
+      "question": "Золотая полка - это..?",
+      "expected_facts": [
+        "полки"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Это полки, которые находятся на уровне глаз и на одну полку ниже",
+      "wrong_answers": [
+        "Это специальная полка в подсобном холодильнике, где хранятся блюда с максимальной наценкой",
+        "Это витрина, оформленная по всем стандартам компании"
+      ]
+    },
+    {
+      "id": "attest_014",
+      "category": "attestation",
+      "question": "При поставке замороженных моти от \"Мистер Че\" выяснилось, что товар разморожен. Как правильно поступить?",
+      "expected_facts": [
+        "реализовать"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Реализовать продукт в течение 48 часов",
+      "wrong_answers": [
+        "Немедленно утилизировать весь брак",
+        "Заморозить товар повторно и продать позже",
+        "Вернуть весь товар вне зависимости от количества, не сообщая об этом"
+      ]
+    },
+    {
+      "id": "attest_015",
+      "category": "attestation",
+      "question": "Что необходимо сделать при технической неисправности кофемашины или кофемолки?",
+      "expected_facts": [
+        "оформить"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Оформить заявку в чат-бот \"Баристика»",
+      "wrong_answers": [
+        "Позвонить шеф-бариста",
+        "Написать в личные сообщения администратору"
+      ]
+    },
+    {
+      "id": "attest_016",
+      "category": "attestation",
+      "question": "Каким вкладышем на витрине обозначаются самые популярные блюда?",
+      "expected_facts": [
+        "топчик"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Топчик",
+      "wrong_answers": [
+        "Осторожно Премьера",
+        "Только вкусное и ничего лишнего",
+        "Ешьте только вкусное"
+      ]
+    },
+    {
+      "id": "attest_017",
+      "category": "attestation",
+      "question": "Что такое экстракция?",
+      "expected_facts": [
+        "процесс"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Процесс при котором вода извлекает из кофе растворимые соединения",
+      "wrong_answers": [
+        "Процесс взбитие молока",
+        "Чистка кофемашины",
+        "Сорт нашего зерна"
+      ]
+    },
+    {
+      "id": "attest_018",
+      "category": "attestation",
+      "question": "На какую статью списания стоит списать продукт, который отдали гостю для сохранения лояльности?",
+      "expected_facts": [
+        "списать"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Списать на статью \"Подарки/компенсация покупателя\"",
+      "wrong_answers": [
+        "Списать на статью \"Просроченная продукция\" без комментариев",
+        "Ответственность в данном случае лежит на всех сотрудников смены, сумма удерживается с заработной платы",
+        "Списать на статью списания \"Дегустация\""
+      ]
+    },
+    {
+      "id": "attest_019",
+      "category": "attestation",
+      "question": "В каких случаях допускается списание блюд на статью списания \"дегустация\"?",
+      "expected_facts": [
+        "пробы"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Для пробы новинок сотрудниками, новых сотрудников и проверки качества (по согласованию)",
+      "wrong_answers": [
+        "Только для гостей при запуске нового блюда",
+        "Только при поступлении жалоб от гостей",
+        "По личному желанию администратора"
+      ]
+    },
+    {
+      "id": "attest_020",
+      "category": "attestation",
+      "question": "Почему холдеры должны быть вставлены в группы кофемашины?",
+      "expected_facts": [
+        "чтобы"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Чтобы сохранялась температура и не нарушался процесс экстракции",
+      "wrong_answers": [
+        "Чтобы не потерялись",
+        "Чтобы кофемашина не ломалась",
+        "Для визуального порядка"
+      ]
+    },
+    {
+      "id": "attest_021",
+      "category": "attestation",
+      "question": "Какого объема напиток входит в акцию с завтраками?",
+      "expected_facts": [],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "0,2",
+      "wrong_answers": [
+        "0,4",
+        "0,3",
+        "0,6"
+      ]
+    },
+    {
+      "id": "attest_022",
+      "category": "attestation",
+      "question": "Акция “Горячее+суп”, что входит в состав?",
+      "expected_facts": [
+        "горячее"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Горячее: Карбонара или Болоньезе; Суп: Борщ или Солянка",
+      "wrong_answers": [
+        "Горячее: Карбонара или Болоньезе; Суп: Уха по-фински или Солянка",
+        "Горячее: Греча по-купечески или Паста с курицей терияки ; Суп: Борщ или Солянка",
+        "Горячее: Котлета рубленная с пюре или Болоньезе; Суп: Тыквенный или Солянка"
+      ]
+    },
+    {
+      "id": "attest_023",
+      "category": "attestation",
+      "question": "Какие чаты у нас существуют?",
+      "expected_facts": [
+        "штрих-код"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Чат \"Учет. Штрих-код\"",
+      "wrong_answers": [
+        "Чат \"Помощь / Подработки\"",
+        "Чат \"Проблемы с автозаказом еды\"",
+        "Чат \"Приветствие и поздравления\""
+      ]
+    },
+    {
+      "id": "attest_024",
+      "category": "attestation",
+      "question": "В каком чате необходимо запросить согласование на пробу блюда, на которое поступила жалоба от гостя?",
+      "expected_facts": [
+        "контроль"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Чат \"Контроль Качества ТУ\"",
+      "wrong_answers": [
+        "Чат \"Проблемы с готовой едой производства\""
+      ]
+    },
+    {
+      "id": "attest_025",
+      "category": "attestation",
+      "question": "Какой питчер необходимо использовать под безлактозное молоко?",
+      "expected_facts": [
+        "питчер"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Питчер с подписью «Альтернативное молоко»",
+      "wrong_answers": [
+        "Любой свободный питчер",
+        "Только питчер 0,150мл."
+      ]
+    },
+    {
+      "id": "attest_026",
+      "category": "attestation",
+      "question": "Когда нужно настраивать помол?",
+      "expected_facts": [
+        "утром"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Утром и в течение дня проверяем на отклонение вкуса или рецепта",
+      "wrong_answers": [
+        "Один раз в неделю",
+        "Только при жалобе гостя",
+        "Один раз в день утром"
+      ]
+    },
+    {
+      "id": "attest_027",
+      "category": "attestation",
+      "question": "Что необходимо сделать при поломке микроволновки на точке?",
+      "expected_facts": [
+        "составить"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Составить заявку в чат-бот и уведомить территориального управляющего",
+      "wrong_answers": [
+        "Позвонить технику напрямую и ждать его приезда. Контакты техника найти в файле \"Контакты\"",
+        "Написать администратору и продолжить работу без изменений",
+        "Самостоятельно попытаться устранить поломку и продолжить работу"
+      ]
+    },
+    {
+      "id": "attest_028",
+      "category": "attestation",
+      "question": "Как понять, что помол крупный?",
+      "expected_facts": [
+        "эспрессо"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Эспрессо течет быстро, кислый, как будто вода не встречает сопротивления",
+      "wrong_answers": [
+        "Эспрессо течет медленно, по вкусу очень горько",
+        "Экстракция длится долго"
+      ]
+    },
+    {
+      "id": "attest_029",
+      "category": "attestation",
+      "question": "Необходимо ли вносить продукт в стоп-лист, если на полке осталось 2 позиции?",
+      "expected_facts": [],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Да",
+      "wrong_answers": [
+        "Нет"
+      ]
+    },
+    {
+      "id": "attest_030",
+      "category": "attestation",
+      "question": "На какую статью списания необходимо списать бракованную продукцию Онигири?",
+      "expected_facts": [
+        "мистер"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Брак \"Мистер Че\"",
+      "wrong_answers": [
+        "Брак производства",
+        "По согласованию ТУ"
+      ]
+    },
+    {
+      "id": "attest_031",
+      "category": "attestation",
+      "question": "Для чего необходим чат \"Контроль качества ТУ\"?",
+      "expected_facts": [
+        "данный"
+      ],
+      "expected_sources": [],
+      "expect_images": false,
+      "expect_found": true,
+      "correct_answer": "Данный чат необходим для проблем с органолептическими показателями блюда",
+      "wrong_answers": [
+        "Данный чат необходим для проблем с поставкой, а именно расхождение по накладной",
+        "Данный чат необходим для проблем с поставкой, а именно не товарный вид продукции (открытая упаковка и тд)"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#66B345"/>
+      <stop offset="100%" stop-color="#4A8A30"/>
+    </linearGradient>
+    <linearGradient id="sailGrad" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#F0E8DC"/>
+    </linearGradient>
+    <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.25)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.05)"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.15"/>
+    </filter>
+    <clipPath id="roundRect">
+      <rect width="512" height="512" rx="96" ry="96"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <g clip-path="url(#roundRect)">
+    <rect width="512" height="512" fill="url(#bgGrad)"/>
+    
+    <!-- Subtle radial glow -->
+    <circle cx="256" cy="220" r="280" fill="rgba(255,255,255,0.07)"/>
+
+    <!-- Centered boat group, scaled up -->
+    <g transform="translate(256,256) scale(1.15) translate(-250,-228)">
+      <g filter="url(#shadow)">
+        
+        <!-- Mast -->
+        <line x1="220" y1="90" x2="220" y2="340" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+        
+        <!-- Main sail (large triangle) -->
+        <path d="M224 100 L224 330 L380 310 Z" fill="url(#sailGrad)" opacity="0.95"/>
+        <!-- Main sail seam lines -->
+        <line x1="224" y1="158" x2="354" y2="304" stroke="rgba(200,180,160,0.3)" stroke-width="1"/>
+        <line x1="224" y1="216" x2="328" y2="308" stroke="rgba(200,180,160,0.3)" stroke-width="1"/>
+        <line x1="224" y1="274" x2="302" y2="312" stroke="rgba(200,180,160,0.3)" stroke-width="1"/>
+
+        <!-- Jib sail (front triangle) -->
+        <path d="M216 105 L216 310 L115 290 Z" fill="#FFFFFF" opacity="0.85"/>
+        <!-- Jib seam lines -->
+        <line x1="216" y1="170" x2="138" y2="294" stroke="rgba(200,180,160,0.25)" stroke-width="1"/>
+        <line x1="216" y1="230" x2="158" y2="298" stroke="rgba(200,180,160,0.25)" stroke-width="1"/>
+
+        <!-- Hull -->
+        <path d="M110 340 Q115 380 180 385 L320 385 Q385 380 390 340 Z" fill="#FFFFFF" opacity="0.95"/>
+        <!-- Hull accent line -->
+        <path d="M125 355 Q130 375 185 378 L315 378 Q375 375 378 355" fill="none" stroke="rgba(74,138,48,0.3)" stroke-width="2"/>
+        
+        <!-- Deck/cabin -->
+        <rect x="175" y="332" width="100" height="12" rx="3" fill="rgba(255,255,255,0.7)"/>
+
+      </g>
+
+      <!-- Water waves -->
+      <g opacity="0.5">
+        <path d="M-6 370 Q54 358 122 370 Q190 382 250 370 Q310 358 378 370 Q446 382 506 370 L506 420 L-6 420 Z" fill="url(#waterGrad)"/>
+        <path d="M-6 390 Q64 378 134 390 Q204 402 274 390 Q344 378 414 390 Q484 402 506 390 L506 430 L-6 430 Z" fill="rgba(255,255,255,0.1)"/>
+        <path d="M-6 408 Q74 398 154 408 Q234 418 314 408 Q394 398 474 408 Q494 412 506 408 L506 440 L-6 440 Z" fill="rgba(255,255,255,0.06)"/>
+      </g>
+    </g>
+
+
+  </g>
+</svg>

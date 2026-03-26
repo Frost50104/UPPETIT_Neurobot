@@ -1,20 +1,21 @@
-# UPPETIT Knowledge Bot
+# UPPETIT Neurobot
 
-Корпоративный Telegram-бот на основе RAG (Retrieval-Augmented Generation).
-Отвечает на вопросы сотрудников **строго по базе знаний** — файлу `Information bank.docx`.
-Не использует интернет, не додумывает, не галлюцинирует.
+Корпоративная база знаний UPPETIT. PWA-приложение с RAG-пайплайном: отвечает на вопросы сотрудников строго по базе знаний. Не использует интернет, не додумывает, не галлюцинирует.
 
 ---
 
 ## Стек
 
-| Слой | Технология | Обоснование |
-|---|---|---|
-| Telegram | **aiogram 3** | Async-native, лучшая типизация, production-ready |
-| LLM | **OpenAI gpt-4o-mini** | Баланс качества и стоимости |
-| Embeddings | **text-embedding-3-small** | Быстро, дёшево, достаточно точно |
-| Vector DB | **FAISS (IndexFlatIP)** | Без сервера, хранится локально, детерминирован |
-| Парсинг docx | **python-docx** | Официальная библиотека, извлекает текст + изображения |
+| Слой | Технология |
+|---|---|
+| Backend | FastAPI + SQLAlchemy async + PostgreSQL + Redis |
+| Frontend | React 18 + Vite + PWA (Workbox) |
+| LLM | OpenAI gpt-4o-mini |
+| Embeddings | text-embedding-3-small |
+| Vector DB | FAISS (IndexFlatIP) |
+| Парсинг KB | python-docx, pdfplumber, openpyxl |
+| Auth | JWT (httpOnly cookies) + bcrypt + RBAC |
+| Deploy | rsync + systemd |
 
 ---
 
@@ -22,163 +23,135 @@
 
 ```
 UPPETIT_Neurobot/
-├── main.py              # Точка входа
-├── config.py            # Настройки через pydantic-settings + .env
-├── kb_loader.py         # Парсинг docx → DocSection[]
-├── chunker.py           # DocSection[] → Chunk[] (с overlap)
-├── vector_store.py      # FAISS: build / search / persist
-├── rag_answerer.py      # RAG-пайплайн: поиск → ChatGPT → AnswerResult
-├── bot/
-│   ├── __init__.py
-│   └── handlers.py      # aiogram 3 handlers (/start /help /reload_kb + вопросы)
-├── requirements.txt
-├── .env                 # Секреты (gitignored)
-├── .env.example         # Шаблон
-├── Information bank.docx
-├── storage/             # FAISS-индекс (создаётся автоматически, gitignored)
-├── kb_images/           # Извлечённые изображения (gitignored)
-└── logs/                # Логи (gitignored)
+├── backend/
+│   ├── main.py              # FastAPI entry point, lifespan, SPA serving
+│   ├── config.py            # Pydantic settings (.env)
+│   ├── database.py          # Async SQLAlchemy engine
+│   ├── models/              # SQLAlchemy models (User, Role, Chat, Message)
+│   ├── core/
+│   │   ├── auth.py          # JWT + bcrypt
+│   │   ├── rbac.py          # Roles & permissions
+│   │   └── limiter.py       # Rate limiting (slowapi + Redis)
+│   ├── api/
+│   │   ├── auth.py          # Login, refresh, logout, change-password
+│   │   ├── chats.py         # CRUD чатов
+│   │   ├── messages.py      # Сообщения + RAG-ответы
+│   │   └── admin/
+│   │       ├── users.py     # Управление пользователями
+│   │       └── kb.py        # База знаний: статус, обновление, бенчмарк
+│   ├── rag/
+│   │   ├── rag_answerer.py  # RAG pipeline: поиск → GPT → ответ
+│   │   ├── vector_store.py  # FAISS: build / search / persist
+│   │   ├── chunker.py       # Разбивка на чанки с overlap
+│   │   ├── kb_loader.py     # Парсинг docx/pdf/xlsx
+│   │   └── gdrive.py        # Синхронизация с Google Drive
+│   ├── benchmark.py         # Автоматический бенчмарк качества RAG
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx          # React Router, guards
+│   │   ├── pages/           # ChatPage, Login, ChangePassword, Admin*
+│   │   ├── components/      # Layout, ChatSidebar, ChatMessage, etc.
+│   │   ├── api/             # Axios client + interceptors
+│   │   └── store/           # Zustand (auth)
+│   ├── public/              # Icons, fonts
+│   └── vite.config.js       # PWA, proxy, version injection
+└── deploy/
+    ├── deploy.sh            # Деплой на staging/prod
+    └── systemd/             # Service files
 ```
 
 ---
 
-## Установка и запуск (локально)
+## Окружения
 
-### 1. Клонировать репозиторий и создать виртуальное окружение
-
-```bash
-python3.11 -m venv .venv
-source .venv/bin/activate   # macOS / Linux
-# .venv\Scripts\activate    # Windows
-```
-
-### 2. Установить зависимости
-
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Настроить `.env`
-
-Скопируйте шаблон и заполните:
-
-```bash
-cp .env.example .env
-```
-
-Обязательные поля:
-```
-BOT_TOKEN=<токен из @BotFather>
-OPENAI_API_KEY=<ключ OpenAI>
-```
-
-Опциональные (ограничение доступа):
-```
-ADMIN_IDS=123456789,987654321   # кто может вызывать /reload_kb
-ALLOWED_CHAT_IDS=               # оставьте пустым = разрешено всем
-```
-
-### 4. Положить базу знаний в корень проекта
-
-```
-Information bank.docx   ← уже должен быть здесь
-```
-
-### 5. Запустить бота
-
-```bash
-python main.py
-```
-
-При первом запуске бот автоматически:
-- Прочитает `Information bank.docx`
-- Извлечёт текст и изображения
-- Построит FAISS-индекс и сохранит его в `./storage/`
-
-При следующих запусках индекс загружается с диска (быстрый старт).
-
----
-
-## Обновление базы знаний
-
-1. Замените `Information bank.docx` в корне проекта новой версией.
-2. Напишите боту (от имени администратора):
-   ```
-   /reload_kb
-   ```
-   Бот перечитает docx, пересоберёт индекс и подтвердит успех.
-
-> **Примечание.** Пока идёт перестройка (~30–120 сек в зависимости от размера docx),
-> бот продолжает работать со старым индексом.
-
----
-
-## Команды бота
-
-| Команда | Описание | Доступ |
+| | Staging | Production |
 |---|---|---|
-| `/start` | Приветствие + инструкция | Все |
-| `/help` | Правила использования | Все |
-| `/reload_kb` | Перестроить индекс из docx | Только администраторы (`ADMIN_IDS`) |
-| Любой текст | Вопрос к базе знаний | Все |
+| URL | https://test.uppetitgpt.ru | https://uppetitgpt.ru |
+| Порт | 8002 | 8001 |
+| Путь | /opt/neurobot-staging | /opt/neurobot |
+| Сервис | neurobot-staging | neurobot |
 
 ---
 
-## Архитектура RAG
+## Локальная разработка
 
-```
-Вопрос пользователя
-        ↓
-  Embedding (OpenAI)
-        ↓
-  FAISS поиск top-K (cosine similarity)
-        ↓
-  Фильтр по MIN_SCORE
-        ↓
-  Сборка контекста (chunk_id + heading + text)
-        ↓
-  ChatGPT (system prompt с запретом галлюцинаций)
-        ↓
-  Ответ + источники (chunk ids / заголовки)
-        ↓
-  Изображения из релевантных чанков (если есть)
+### Backend
+
+```bash
+cd backend
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.staging.example .env   # заполнить секреты
+uvicorn main:app --reload --port 8001
 ```
 
-### Анти-галлюцинационные меры
+### Frontend
 
-- `temperature=0.05` — минимальная вариативность
-- Системный промпт явно запрещает использование внешних знаний
-- Если ни один чанк не преодолел порог `MIN_SCORE` — ответ не генерируется вовсе
-- Модель обязана перечислить источники в каждом ответе
+```bash
+cd frontend
+npm install
+npm run dev   # http://localhost:5173, proxy /api → localhost:8001
+```
 
 ---
 
-## Edge-cases
+## Деплой
 
-| Ситуация | Поведение |
+```bash
+./deploy/deploy.sh staging           # backend + frontend на staging
+./deploy/deploy.sh staging backend   # только backend
+./deploy/deploy.sh staging frontend  # только frontend
+./deploy/deploy.sh prod              # production
+```
+
+Скрипт автоматически: генерирует VERSION (git hash + dirty flag + timestamp), собирает frontend, синхронизирует через rsync, перезапускает сервис.
+
+Пароль сервера читается из `~/.neurobot-deploy` (формат: `SERVER_PASS=...`).
+
+---
+
+## RAG-пайплайн
+
+```
+Google Drive (docx/pdf/xlsx)
+        ↓
+  kb_loader: парсинг → DocSection[]
+        ↓
+  chunker: разбивка (800 символов, overlap 150)
+        ↓
+  vector_store: embedding → FAISS IndexFlatIP
+        ↓
+  Вопрос пользователя → embedding → гибридный поиск
+  (semantic + keyword bonus, diversity filter)
+        ↓
+  GPT-4o-mini (temperature=0.05, антигаллюцинационный промпт)
+        ↓
+  Ответ + источники + изображения
+```
+
+---
+
+## Роли и доступ
+
+| Роль | Права |
 |---|---|
-| `Information bank.docx` отсутствует при старте | Бот стартует в degraded-режиме, сообщает об этом при первом вопросе |
-| Пустой или битый docx | Исключение перехватывается; `/reload_kb` возвращает понятную ошибку |
-| Вопрос не найден в базе | Возвращается текст «В базе знаний нет информации…» без вызова GPT |
-| Ответ > 4096 символов | Автоматически разбивается на части |
-| OpenAI API недоступен | Исключение перехватывается; пользователь получает «попробуйте позже» |
-| Rate limit OpenAI | Исключение перехватывается аналогично |
-| Изображение удалено с диска | Пропускается с предупреждением в лог |
+| employee | chat:use |
+| admin | chat:use, kb:manage, user:manage, admin:panel |
 
 ---
 
 ## Настройка параметров RAG
 
-В `.env` можно переопределить:
+В `.env`:
 
 ```
-CHUNK_SIZE=800      # символов в чанке
-CHUNK_OVERLAP=150   # символов перекрытия
-TOP_K=6             # кол-во чанков для контекста
-MIN_SCORE=0.20      # минимальная схожесть (0..1)
+CHUNK_SIZE=800
+CHUNK_OVERLAP=150
+TOP_K=6
+MIN_SCORE=0.20
+MIN_SEMANTIC_SCORE=0.20
 CHAT_MODEL=gpt-4o-mini
 MAX_TOKENS=1500
 ```
-
-Чем выше `TOP_K` — тем больше контекста (дороже), но полнее ответ.
-Чем выше `MIN_SCORE` — тем строже фильтр (меньше ложных срабатываний).

@@ -1,0 +1,15 @@
+[Unit]
+Description=Neurobot Staging
+After=network.target postgresql.service redis.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/neurobot-staging/backend
+Environment=PATH=/opt/neurobot-staging/backend/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+ExecStart=/opt/neurobot-staging/backend/.venv/bin/python -m uvicorn main:app --host 127.0.0.1 --port 8002
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
