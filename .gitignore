@@ -41,6 +41,9 @@ backend/storage/
 backend/kb_images/
 backend/kb_downloads/
 
+# Internal documents
+*.docx
+
 # Google service account key
 uppetitgpt-8eb57cf91dce.json
 

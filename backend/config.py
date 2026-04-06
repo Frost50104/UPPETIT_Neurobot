@@ -26,16 +26,17 @@ class Settings(BaseSettings):
 
     # OpenAI
     openai_api_key: str
-    embedding_model: str = "text-embedding-3-small"
-    chat_model: str = "gpt-4o-mini"
+    embedding_model: str = "text-embedding-3-large"
+    chat_model: str = "gpt-4o"
     max_tokens: int = 1500
 
     # RAG
-    chunk_size: int = 800
-    chunk_overlap: int = 150
-    top_k: int = 6
+    chunk_size: int = 1200
+    chunk_overlap: int = 200
+    top_k: int = 10
     min_score: float = 0.20
     min_semantic_score: float = 0.20
+    query_rewrite: bool = True
     storage_dir: str = "storage"
     images_dir: str = "kb_images"
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getKBStatus, refreshKB, getKBHistory, deleteKBHistory, startBenchmark, getBenchmarkStatus } from '../../api/admin'
+import { getKBStatus, refreshKB, getKBHistory, deleteKBHistory, startBenchmark, getBenchmarkStatus, getFeedbackStats } from '../../api/admin'
 import toast from 'react-hot-toast'
 
 export default function AdminKB() {
@@ -14,15 +14,21 @@ export default function AdminKB() {
   const [benchPolling, setBenchPolling] = useState(false)
   const [reportOpen, setReportOpen] = useState(null) // index into benchHistory, or 'running'
 
+  // Feedback state
+  const [fbStats, setFbStats] = useState(null)
+  const [fbTab, setFbTab] = useState('dislikes') // 'dislikes' or 'likes'
+  const [fbExpanded, setFbExpanded] = useState(null) // index of expanded item
+
   const load = async () => {
     try {
-      const [statusRes, historyRes, benchRes] = await Promise.all([
-        getKBStatus(), getKBHistory(), getBenchmarkStatus(),
+      const [statusRes, historyRes, benchRes, fbRes] = await Promise.all([
+        getKBStatus(), getKBHistory(), getBenchmarkStatus(), getFeedbackStats(),
       ])
       setStatus(statusRes.data)
       setHistory(historyRes.data)
       setBenchRunningData(benchRes.data.running)
       setBenchHistory(benchRes.data.history || [])
+      setFbStats(fbRes.data)
       if (benchRes.data.running?.status === 'running') setBenchPolling(true)
       if (statusRes.data.last_sync_status === 'in_progress') setRefreshing(true)
     } catch {} finally { setLoading(false) }
@@ -246,6 +252,99 @@ export default function AdminKB() {
             </div>
             <pre className="benchmark-report-body">{reportContent}</pre>
           </div>
+        </div>
+      )}
+
+      {/* Feedback section */}
+      <h3 style={{ marginBottom: '.75rem' }}>Обратная связь</h3>
+      {fbStats && (
+        <div className="card" style={{ marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '.75rem' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--success)' }}>
+                {fbStats.total_likes}
+              </div>
+              <div style={{ fontSize: '.8rem', color: 'var(--text-secondary)' }}>Лайков</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--danger)' }}>
+                {fbStats.total_dislikes}
+              </div>
+              <div style={{ fontSize: '.8rem', color: 'var(--text-secondary)' }}>Дизлайков</div>
+            </div>
+          </div>
+
+          {(fbStats.total_likes > 0 || fbStats.total_dislikes > 0) && (<>
+            <div style={{ display: 'flex', gap: '.25rem', marginBottom: '.75rem' }}>
+              <button
+                className={`btn btn-sm${fbTab === 'dislikes' ? ' btn-primary' : ''}`}
+                style={{ flex: 1, fontSize: '.8rem', padding: '.375rem .5rem' }}
+                onClick={() => { setFbTab('dislikes'); setFbExpanded(null) }}
+              >
+                Дизлайки ({fbStats.total_dislikes})
+              </button>
+              <button
+                className={`btn btn-sm${fbTab === 'likes' ? ' btn-primary' : ''}`}
+                style={{ flex: 1, fontSize: '.8rem', padding: '.375rem .5rem' }}
+                onClick={() => { setFbTab('likes'); setFbExpanded(null) }}
+              >
+                Лайки ({fbStats.total_likes})
+              </button>
+            </div>
+
+            <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+              {(fbTab === 'dislikes' ? fbStats.recent_dislikes : fbStats.recent_likes).map((item, i) => (
+                <div
+                  key={i}
+                  style={{
+                    padding: '.5rem .625rem',
+                    borderRadius: 8,
+                    background: 'var(--bg)',
+                    marginBottom: '.375rem',
+                    cursor: 'pointer',
+                    fontSize: '.85rem',
+                  }}
+                  onClick={() => setFbExpanded(fbExpanded === i ? null : i)}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '.5rem' }}>
+                    <div style={{ fontWeight: 500, flex: 1, minWidth: 0 }}>
+                      <span style={{ color: fbTab === 'dislikes' ? 'var(--danger)' : 'var(--success)', marginRight: '.375rem' }}>
+                        {fbTab === 'dislikes' ? '−' : '+'}
+                      </span>
+                      {item.question}
+                    </div>
+                    <span style={{ fontSize: '.75rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                      {item.user}
+                    </span>
+                  </div>
+                  {fbExpanded === i && (
+                    <div style={{
+                      marginTop: '.5rem', padding: '.5rem',
+                      background: 'var(--surface)', borderRadius: 6,
+                      fontSize: '.8rem', lineHeight: 1.5,
+                      whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                    }}>
+                      {item.answer}
+                    </div>
+                  )}
+                  <div style={{ fontSize: '.7rem', color: 'var(--text-secondary)', marginTop: '.25rem' }}>
+                    {formatDate(item.created_at)}
+                  </div>
+                </div>
+              ))}
+              {(fbTab === 'dislikes' ? fbStats.recent_dislikes : fbStats.recent_likes).length === 0 && (
+                <p style={{ color: 'var(--text-secondary)', fontSize: '.85rem', textAlign: 'center', padding: '.5rem' }}>
+                  Нет записей
+                </p>
+              )}
+            </div>
+          </>)}
+
+          {fbStats.total_likes === 0 && fbStats.total_dislikes === 0 && (
+            <p style={{ color: 'var(--text-secondary)', fontSize: '.85rem' }}>
+              Пока нет оценок от пользователей
+            </p>
+          )}
         </div>
       )}
 

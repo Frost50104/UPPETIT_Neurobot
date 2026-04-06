@@ -162,6 +162,7 @@ def apply_corrections(vector_store) -> int:
             heading_level=1,
             source_file=entry["source_file"],
             images=[],
+            image_captions=[],
         )
         for i, entry in enumerate(CORRECTIONS)
     ]

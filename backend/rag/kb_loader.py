@@ -28,6 +28,7 @@ class DocSection:
     heading_level: int        # 0 = no heading, 1 = Heading 1, ...
     text: str                 # concatenated paragraph text
     images: list[str] = field(default_factory=list)  # absolute paths to images
+    image_captions: list[str] = field(default_factory=list)  # vision-generated captions (paired 1:1 with images)
     position: int = 0         # paragraph index of the heading in the document
     source_file: str = ""     # cleaned filename for context
 

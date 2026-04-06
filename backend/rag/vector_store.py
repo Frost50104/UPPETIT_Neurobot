@@ -87,7 +87,7 @@ class VectorStore:
         query: str,
         k: int = 6,
         min_semantic_score: float = 0.0,
-        max_per_source: int = 2,
+        max_per_source: int = 3,
     ) -> list[tuple[Chunk, float]]:
         """
         Return up to *k* (chunk, cosine_score) pairs ranked by relevance.
@@ -237,6 +237,10 @@ class VectorStore:
     @property
     def chunk_count(self) -> int:
         return len(self._chunks)
+
+    @property
+    def chunks(self) -> list[Chunk]:
+        return self._chunks
 
     # ------------------------------------------------------------------
     # OpenAI embedding helpers

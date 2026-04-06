@@ -35,6 +35,7 @@
       "category": "team",
       "question": "Кто такой Александр Попов?",
       "expected_facts": [
+        "руководитель",
         "ассортимент"
       ],
       "expected_sources": [

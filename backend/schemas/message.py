@@ -13,6 +13,7 @@ class MessageOut(BaseModel):
     content: str
     sources: list = []
     images: list = []
+    feedback: str | None = None  # 'like', 'dislike', or None
     created_at: datetime
 
     model_config = {"from_attributes": True}

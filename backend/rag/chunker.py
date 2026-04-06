@@ -28,6 +28,7 @@ class Chunk:
     heading_level: int
     text: str              # actual chunk content (with context prefix)
     images: list[str] = field(default_factory=list)
+    image_captions: list[str] = field(default_factory=list)  # paired 1:1 with images
     section_index: int = 0
     chunk_index: int = 0   # position within the section's chunks
     source_file: str = ""  # cleaned filename
@@ -70,9 +71,16 @@ def chunk_sections(
             section.text, section.images, text_chunks
         )
 
+        # Build caption lookup so captions follow their images
+        section_captions = getattr(section, 'image_captions', None) or []
+        caption_lookup: dict[str, str] = {}
+        for img, cap in zip(section.images, section_captions):
+            caption_lookup[img] = cap
+
         for chunk_idx, text in enumerate(text_chunks):
             chunk_id = _make_id(section.heading, sec_idx, chunk_idx)
             images = chunk_images_map[chunk_idx]
+            captions = [caption_lookup.get(img, "") for img in images]
 
             # Prepend context to chunk text so embeddings capture the topic
             full_text = context_prefix + text
@@ -84,6 +92,7 @@ def chunk_sections(
                     heading_level=section.heading_level,
                     text=full_text,
                     images=images,
+                    image_captions=captions,
                     section_index=sec_idx,
                     chunk_index=chunk_idx,
                     source_file=section.source_file,

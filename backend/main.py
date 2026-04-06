@@ -128,6 +128,7 @@ def _init_rag(app: FastAPI):
         max_tokens=settings.max_tokens,
         min_score=settings.min_score,
         min_semantic_score=settings.min_semantic_score,
+        query_rewrite=settings.query_rewrite,
     )
 
     app.state.openai_client = client
@@ -187,12 +188,15 @@ from api.chats import router as chats_router
 from api.messages import router as messages_router
 from api.admin.users import router as admin_users_router
 from api.admin.kb import router as admin_kb_router
+from api.feedback import router as feedback_router, stats_router as feedback_stats_router
 
 app.include_router(auth_router)
 app.include_router(chats_router)
 app.include_router(messages_router)
+app.include_router(feedback_router)
 app.include_router(admin_users_router)
 app.include_router(admin_kb_router)
+app.include_router(feedback_stats_router)
 
 
 # Public KB status (used by frontend to detect rebuild in progress)

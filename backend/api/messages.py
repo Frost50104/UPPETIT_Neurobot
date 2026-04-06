@@ -9,6 +9,7 @@ from database import get_db
 from models.user import User
 from models.chat import Chat
 from models.message import Message
+from models.feedback import MessageFeedback
 from schemas.message import AskRequest, MessageOut, AskResponse
 from core.auth import get_current_active_user
 from config import get_settings
@@ -31,7 +32,25 @@ async def list_messages(
         .where(Message.chat_id == chat_id)
         .order_by(Message.created_at.asc())
     )
-    return result.scalars().all()
+    messages = result.scalars().all()
+
+    # Load feedback for assistant messages
+    msg_ids = [m.id for m in messages if m.role == "assistant"]
+    feedback_map: dict[int, str] = {}
+    if msg_ids:
+        fb_result = await db.execute(
+            select(MessageFeedback)
+            .where(MessageFeedback.message_id.in_(msg_ids))
+        )
+        for fb in fb_result.scalars():
+            feedback_map[fb.message_id] = fb.feedback_type
+
+    out = []
+    for m in messages:
+        msg_out = MessageOut.model_validate(m)
+        msg_out.feedback = feedback_map.get(m.id)
+        out.append(msg_out)
+    return out
 
 
 @router.post("", response_model=AskResponse)

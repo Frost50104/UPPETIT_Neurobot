@@ -163,6 +163,11 @@ def _sync_rebuild(app) -> dict:
     if not sections:
         raise ValueError("Не удалось извлечь содержимое из скачанных файлов")
 
+    # 3b. Caption images using vision model
+    from rag.image_captioner import caption_all_images
+    client = app.state.openai_client
+    caption_all_images(sections, client)
+
     # 4. Chunk
     chunks = chunk_sections(sections, settings.chunk_size, settings.chunk_overlap)
 
@@ -290,7 +295,7 @@ def _run_benchmark_sync(app) -> None:
         from benchmark import (
             QuestionResult, QuestionSpec, check_sources, check_facts,
             check_images, check_image_sources, check_not_found,
-            judge_answer, judge_attestation,
+            check_key_fact_early, judge_answer, judge_attestation,
         )
         import time
 
@@ -319,6 +324,7 @@ def _run_benchmark_sync(app) -> None:
             qr.image_ok = check_images(rag_result, spec)
             qr.image_source_ok = check_image_sources(rag_result, spec)
             qr.not_found_ok = check_not_found(rag_result, spec)
+            qr.key_fact_early = check_key_fact_early(rag_result, spec)
             qr.correct_answer = spec.correct_answer
 
             is_attestation = bool(spec.correct_answer)

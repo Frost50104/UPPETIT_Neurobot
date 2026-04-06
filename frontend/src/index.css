@@ -511,6 +511,49 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); }
 }
 .chat-kb-image:hover { opacity: .8; }
 
+/* Feedback buttons */
+.feedback-buttons {
+  display: flex;
+  gap: .25rem;
+  margin-top: .5rem;
+  padding-top: .375rem;
+  border-top: 1px solid var(--border);
+}
+.feedback-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all .15s;
+  opacity: .5;
+}
+.feedback-btn:hover {
+  background: var(--bg);
+  opacity: 1;
+}
+.feedback-btn.active {
+  opacity: 1;
+}
+.feedback-btn.active svg {
+  fill: currentColor;
+}
+.feedback-btn:first-child.active {
+  color: #22c55e;
+}
+.feedback-btn:last-child.active {
+  color: #ef4444;
+}
+.feedback-btn:disabled {
+  pointer-events: none;
+  opacity: .3;
+}
+
 /* Image lightbox */
 .lightbox-overlay {
   position: fixed;

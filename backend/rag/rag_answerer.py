@@ -35,31 +35,56 @@ _SYSTEM_PROMPT = """\
 1. Используй информацию из блока [КОНТЕКСТ] как основной источник.
    Синтезируй ответ из всех предоставленных фрагментов, даже если они частично релевантны.
 
-2. ПРИОРИТЕТ ИСТОЧНИКОВ: если в контексте есть фрагменты со стандартами, рецептами
+2. НАЧИНАЙ С ГЛАВНОГО. Определи тип вопроса и структурируй ответ:
+   - О человеке/сотруднике → первое предложение: полное имя + должность/роль в компании
+   - О процедуре/процессе → начни с чёткого порядка действий
+   - О рецепте/напитке → начни с точных ингредиентов и пропорций
+   - О правиле/стандарте → начни с формулировки правила
+   Ключевой факт должен быть в первых двух предложениях ответа.
+
+3. ПРИОРИТЕТ ИСТОЧНИКОВ: если в контексте есть фрагменты со стандартами, рецептами
    или регламентами UPPETIT (документы «Стандарты», «ТТК», «Зерно», инструкции) —
    используй именно их. Общеобразовательные фрагменты о кофе, продуктах и т.д.
    используй только как дополнение, НЕ противоречащее стандартам компании.
 
-3. Не придумывай факты, процедуры, контакты, цифры, имена, регламенты, даты,
+4. Не придумывай факты, процедуры, контакты, цифры, имена, регламенты, даты,
    которых нет в КОНТЕКСТЕ. Если данных не хватает — так и скажи, но сначала
    дай максимум полезной информации из того, что есть.
 
-4. Не ссылайся на интернет или общедоступные источники.
+5. Не ссылайся на интернет или общедоступные источники.
 
-5. Если вопрос допускает несколько трактовок — кратко ответь на наиболее вероятную
+6. Если вопрос допускает несколько трактовок — кратко ответь на наиболее вероятную
    и предложи уточнить.
 
-6. Отвечай структурированно: используй списки, абзацы, выделение где уместно.
+7. Отвечай структурированно: используй списки, абзацы, выделение где уместно.
 
-7. Отвечай на том же языке, на котором задан вопрос.
+8. Отвечай на том же языке, на котором задан вопрос.
 
-8. В конце ответа перечисли источники:
+9. В конце ответа перечисли источники:
    Источники:
    - [chunk_id] Документ → «раздел»
 
-9. Только если контекст СОВСЕМ не содержит полезной информации по теме вопроса,
-   ответь: «К сожалению, в базе знаний не нашлось информации по этому вопросу.
-   Попробуйте перефразировать или обратитесь к руководителю.»
+10. Только если контекст СОВСЕМ не содержит полезной информации по теме вопроса,
+    ответь: «К сожалению, в базе знаний не нашлось информации по этому вопросу.
+    Попробуйте перефразировать или обратитесь к руководителю.»
+"""
+
+
+# ---------------------------------------------------------------------------
+# Query rewrite prompt — expand short questions for better retrieval
+# ---------------------------------------------------------------------------
+
+_QUERY_REWRITE_PROMPT = """\
+Ты — помощник для поиска по корпоративной базе знаний компании UPPETIT \
+(сеть кафе: еда, напитки, кофе, процедуры, сотрудники, стандарты).
+
+Расширь вопрос пользователя: добавь синонимы и ключевые слова, \
+которые могут встречаться в документах с ответом.
+
+Правила:
+- Сохрани исходный смысл
+- Добавь 3-7 релевантных ключевых слов/синонимов
+- Верни ТОЛЬКО расширенный запрос одной строкой, без пояснений
 """
 
 
@@ -107,6 +132,7 @@ class RAGAnswerer:
         max_tokens: int,
         min_score: float = 0.25,
         min_semantic_score: float = 0.25,
+        query_rewrite: bool = True,
     ) -> None:
         self._store = vector_store
         self._client = openai_client
@@ -115,6 +141,29 @@ class RAGAnswerer:
         self._max_tokens = max_tokens
         self._min_score = min_score
         self._min_semantic_score = min_semantic_score
+        self._query_rewrite = query_rewrite
+
+    # ------------------------------------------------------------------
+
+    def _rewrite_query(self, question: str) -> str:
+        """Expand user question with keywords for better FAISS retrieval."""
+        try:
+            response = self._client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": _QUERY_REWRITE_PROMPT},
+                    {"role": "user", "content": question},
+                ],
+                max_tokens=150,
+                temperature=0,
+            )
+            expanded = (response.choices[0].message.content or "").strip()
+            if expanded:
+                logger.debug("Query rewrite: %r -> %r", question[:60], expanded[:80])
+                return expanded
+        except Exception as exc:
+            logger.warning("Query rewrite failed, using original: %s", exc)
+        return question
 
     # ------------------------------------------------------------------
 
@@ -134,9 +183,12 @@ class RAGAnswerer:
                 found=False,
             )
 
-        # 1. Semantic search
+        # 1. Query rewrite for better retrieval (original question used for LLM)
+        search_query = self._rewrite_query(question) if self._query_rewrite else question
+
+        # 2. Semantic search
         results = self._store.search(
-            question, k=self._top_k, min_semantic_score=self._min_semantic_score,
+            search_query, k=self._top_k, min_semantic_score=self._min_semantic_score,
         )
         relevant = [(chunk, score) for chunk, score in results if score >= self._min_score]
 
@@ -188,44 +240,68 @@ class RAGAnswerer:
         if any(marker in answer_text.lower() for marker in _NOT_FOUND_MARKERS):
             return AnswerResult(text=answer_text, found=False)
 
-        # 4. Collect images from high-scoring, text-relevant chunks.
-        #    Two gates:
-        #    a) Score >= 75% of top score.
-        #    b) Chunk text contains at least one *content* query keyword.
-        #       Common function words (наше, какой, через, …) are excluded
-        #       so they don't cause false positives.
-        top_score = relevant[0][1] if relevant else 0
-        image_score_threshold = top_score * 0.75
+        # 4. Collect images via caption-based matching.
+        #    Two passes:
+        #    Pass A: images from retrieved chunks (score gate + caption match)
+        #    Pass B: images from sibling chunks (same source files) matched
+        #            purely by caption keywords — catches photos in chunks
+        #            that scored too low for retrieval.
         query_kws = set()
         for w in question.lower().split():
             w = w.strip("?!.,;:«»\"'()[]")
             if len(w) >= 4 and w not in _IMAGE_STOP_WORDS:
                 query_kws.add(w)
+
         images: list[str] = []
         image_sources: list[str] = []
         seen_paths: set[str] = set()
         seen_hashes: set[str] = set()
+
+        def _try_add_image(img_path: str, source_file: str) -> bool:
+            if img_path in seen_paths:
+                return False
+            seen_paths.add(img_path)
+            try:
+                h = _perceptual_hash(img_path)
+            except Exception:
+                return False
+            if _is_duplicate_image(h, seen_hashes):
+                return False
+            seen_hashes.add(h)
+            images.append(img_path)
+            image_sources.append(source_file)
+            return True
+
+        # Pass A: retrieved chunks — only images with captions matching ALL keywords
+        top_score = relevant[0][1] if relevant else 0
+        image_score_threshold = top_score * 0.75
         for chunk, score in relevant:
             if score < image_score_threshold:
                 continue
-            # Keyword gate: chunk text must mention at least one query keyword
-            if query_kws:
-                chunk_lower = chunk.text.lower()
-                if not any(kw in chunk_lower for kw in query_kws):
+            captions = getattr(chunk, 'image_captions', None) or []
+            for idx, img_path in enumerate(chunk.images):
+                caption = captions[idx] if idx < len(captions) else ""
+                if not caption:
                     continue
-            for img_path in chunk.images:
-                if img_path in seen_paths:
+                if query_kws and not all(kw in caption.lower() for kw in query_kws):
                     continue
-                seen_paths.add(img_path)
-                try:
-                    h = _perceptual_hash(img_path)
-                except Exception:
+                _try_add_image(img_path, chunk.source_file)
+
+        # Pass B: scan sibling chunks from same source files for
+        # caption-matched images not yet found.
+        if query_kws and len(images) < 5:
+            retrieved_sources = {c.source_file for c, _ in relevant}
+            for chunk in self._store.chunks:
+                if chunk.source_file not in retrieved_sources:
                     continue
-                if _is_duplicate_image(h, seen_hashes):
-                    continue
-                seen_hashes.add(h)
-                images.append(img_path)
-                image_sources.append(chunk.source_file)
+                captions = getattr(chunk, 'image_captions', None) or []
+                for idx, img_path in enumerate(chunk.images):
+                    caption = captions[idx] if idx < len(captions) else ""
+                    if not caption:
+                        continue
+                    if all(kw in caption.lower() for kw in query_kws):
+                        _try_add_image(img_path, chunk.source_file)
+
         images = images[:10]
         image_sources = image_sources[:10]
 

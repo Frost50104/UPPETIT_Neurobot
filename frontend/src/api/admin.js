@@ -16,3 +16,6 @@ export const deleteKBHistory = (id) => api.delete(`/admin/kb/history/${id}`)
 // Benchmark
 export const startBenchmark = () => api.post('/admin/kb/benchmark')
 export const getBenchmarkStatus = () => api.get('/admin/kb/benchmark/status')
+
+// Feedback stats
+export const getFeedbackStats = () => api.get('/admin/feedback/stats')

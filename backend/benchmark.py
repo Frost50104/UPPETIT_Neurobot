@@ -42,6 +42,9 @@ logging.basicConfig(
 logger = logging.getLogger("benchmark")
 logger.setLevel(logging.INFO)
 
+# Judge model — use a strong model for accurate evaluation
+_JUDGE_MODEL = "gpt-4o"
+
 
 # ---------------------------------------------------------------------------
 # Data classes
@@ -88,6 +91,7 @@ class QuestionResult:
     image_ok: bool = False
     image_source_ok: bool = True  # True when images come from relevant sources
     not_found_ok: bool = True
+    key_fact_early: bool = True  # first expected_fact in first 300 chars
     # LLM judge
     judge: JudgeScores = field(default_factory=JudgeScores)
     judge_skipped: bool = False
@@ -129,6 +133,7 @@ def init_pipeline() -> tuple[RAGAnswerer, OpenAI, dict]:
         max_tokens=settings.max_tokens,
         min_score=settings.min_score,
         min_semantic_score=settings.min_semantic_score,
+        query_rewrite=settings.query_rewrite,
     )
 
     config_snapshot = {
@@ -141,6 +146,8 @@ def init_pipeline() -> tuple[RAGAnswerer, OpenAI, dict]:
         "chunk_size": settings.chunk_size,
         "chunk_overlap": settings.chunk_overlap,
         "chunk_count": vector_store.chunk_count,
+        "query_rewrite": settings.query_rewrite,
+        "judge_model": _JUDGE_MODEL,
     }
 
     print(f"Pipeline ready. {vector_store.chunk_count} chunks loaded.")
@@ -226,6 +233,15 @@ def check_image_sources(result: AnswerResult, spec: QuestionSpec) -> bool:
     return any(es.lower() in sources_lower for es in spec.expected_sources)
 
 
+def check_key_fact_early(result: AnswerResult, spec: QuestionSpec, chars: int = 300) -> bool:
+    """Check if the first (most important) expected fact appears early in the answer."""
+    if not spec.expected_facts:
+        return True
+    key_fact = spec.expected_facts[0].lower()
+    answer_start = result.text[:chars].lower()
+    return key_fact in answer_start
+
+
 def check_not_found(result: AnswerResult, spec: QuestionSpec) -> bool:
     """For edge cases: result.found should be False."""
     if spec.expect_found:
@@ -238,13 +254,20 @@ def check_not_found(result: AnswerResult, spec: QuestionSpec) -> bool:
 # ---------------------------------------------------------------------------
 
 _JUDGE_PROMPT = """\
-Ты — эксперт по оценке качества ответов корпоративного чат-бота.
+Ты — строгий эксперт по оценке качества ответов корпоративного чат-бота.
 
 Тебе дан вопрос сотрудника и ответ бота. Оцени ответ по 3 критериям (от 1 до 5):
 
 1. **Релевантность** — отвечает ли бот на заданный вопрос (1=совсем не по теме, 5=точно по теме)
-2. **Полнота** — насколько полно раскрыта тема (1=минимум информации, 5=исчерпывающе)
+2. **Полнота** — насколько полно раскрыта тема (1=минимум, 5=исчерпывающе).
+   Обрати особое внимание: начинается ли ответ с самого важного факта?
+   Для вопроса о человеке — должность/роль ДОЛЖНА быть в первых предложениях.
+   Для вопроса о процедуре — порядок действий должен быть сразу.
+   Для вопроса о рецепте — ингредиенты и пропорции должны идти первыми.
+   Снижай оценку если ключевой факт размазан по ответу или упущен.
 3. **Точность** — нет ли выдуманных фактов или противоречий (1=много ошибок, 5=всё корректно)
+
+Будь строгим: 3 = ответ неплохой но не начинается с главного, 4 = хорошая структура, 5 = идеально.
 
 Верни ТОЛЬКО валидный JSON без markdown-блоков:
 {"relevance": N, "completeness": N, "accuracy": N, "comment": "краткий комментарий"}
@@ -281,12 +304,12 @@ def call_with_retry(
 
 
 def judge_answer(client: OpenAI, question: str, answer_text: str) -> JudgeScores:
-    """Ask GPT-4o-mini to evaluate the answer quality."""
+    """Ask LLM judge to evaluate the answer quality."""
     user_msg = f"Вопрос: {question}\n\nОтвет бота:\n{answer_text}"
 
     raw = call_with_retry(
         client,
-        model="gpt-4o-mini",
+        model=_JUDGE_MODEL,
         messages=[
             {"role": "system", "content": _JUDGE_PROMPT},
             {"role": "user", "content": user_msg},
@@ -359,7 +382,7 @@ def judge_attestation(
 
     raw = call_with_retry(
         client,
-        model="gpt-4o-mini",
+        model=_JUDGE_MODEL,
         messages=[
             {"role": "system", "content": _ATTEST_JUDGE_PROMPT},
             {"role": "user", "content": user_msg},
@@ -418,6 +441,7 @@ def run_benchmark(
         qr.image_ok = check_images(rag_result, spec)
         qr.image_source_ok = check_image_sources(rag_result, spec)
         qr.not_found_ok = check_not_found(rag_result, spec)
+        qr.key_fact_early = check_key_fact_early(rag_result, spec)
 
         # Store reference answer for reporting
         qr.correct_answer = spec.correct_answer
@@ -510,6 +534,11 @@ def compute_summary(results: list[QuestionResult]) -> dict:
     img_src_hits = sum(1 for r in img_src_applicable if r.image_source_ok)
     img_src_rate = img_src_hits / len(img_src_applicable) if img_src_applicable else 1.0
 
+    # Key fact early (first expected_fact in first 300 chars)
+    kfe_applicable = [r for r in results if r.found and r.fact_total > 0]
+    kfe_hits = sum(1 for r in kfe_applicable if r.key_fact_early)
+    kfe_rate = kfe_hits / len(kfe_applicable) if kfe_applicable else 1.0
+
     # Not-found accuracy
     nf_applicable = [r for r in results if r.category == "edge_cases"]
     nf_correct = sum(1 for r in nf_applicable if r.not_found_ok)
@@ -575,6 +604,11 @@ def compute_summary(results: list[QuestionResult]) -> dict:
             "total": len(img_src_applicable),
             "rate_pct": round(img_src_rate * 100, 1),
         },
+        "key_fact_early": {
+            "hits": kfe_hits,
+            "total": len(kfe_applicable),
+            "rate_pct": round(kfe_rate * 100, 1),
+        },
         "not_found": {
             "correct": nf_correct,
             "total": len(nf_applicable),
@@ -616,6 +650,9 @@ def print_summary(summary: dict, results: list[QuestionResult]):
     ims = summary["image_sources"]
     print(f"  Image sources:   {ims['hits']}/{ims['total']} ({ims['rate_pct']}%)")
 
+    kfe = summary["key_fact_early"]
+    print(f"  Key fact early:  {kfe['hits']}/{kfe['total']} ({kfe['rate_pct']}%)")
+
     nf = summary["not_found"]
     print(f"  Not-found:       {nf['correct']}/{nf['total']} ({nf['rate_pct']}%)")
 
@@ -631,6 +668,7 @@ def print_summary(summary: dict, results: list[QuestionResult]):
         r for r in results
         if not r.source_hit or r.facts_missing or not r.image_ok
         or not r.image_source_ok or not r.not_found_ok
+        or not r.key_fact_early
         or (not r.judge_skipped and min(r.judge.relevance, r.judge.completeness, r.judge.accuracy) <= 2)
         or (not r.attest_skipped and not r.attest_correct)
     ]
@@ -647,6 +685,8 @@ def print_summary(summary: dict, results: list[QuestionResult]):
                 issues.append("images_miss")
             if not r.image_source_ok:
                 issues.append(f"img_wrong_src={r.image_sources[:3]}")
+            if not r.key_fact_early:
+                issues.append("key_fact_late")
             if not r.not_found_ok:
                 issues.append("not_found_fail")
             if not r.judge_skipped:
@@ -727,6 +767,7 @@ def save_report(
             "image_source_ok": r.image_source_ok,
             "image_sources": r.image_sources,
             "not_found_ok": r.not_found_ok,
+            "key_fact_early": r.key_fact_early,
             "judge": asdict(r.judge) if not r.judge_skipped else None,
             "judge_skipped": r.judge_skipped,
             "attest_correct": r.attest_correct if not r.attest_skipped else None,
